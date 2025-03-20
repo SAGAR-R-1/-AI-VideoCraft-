@@ -1,0 +1,26 @@
+const express = require("express");
+const { Pool } = require("pg");
+
+const app = express();
+const pool = new Pool({
+  user: "postgres",
+  host: "localhost",
+  database: "templates",
+  password: "password",
+  port: 5432,
+});
+
+app.post("/ad-revenue/:templateId", async (req, res) => {
+  const { templateId } = req.params;
+  const { adRevenue } = req.body;
+
+  const creatorShare = adRevenue * 0.20;
+  await pool.query(
+    "UPDATE ad_revenue SET total_earnings = total_earnings + $1, creator_earnings = creator_earnings + $2 WHERE template_id = $3",
+    [adRevenue, creatorShare, templateId]
+  );
+
+  res.json({ message: "Revenue Updated Successfully!" });
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
