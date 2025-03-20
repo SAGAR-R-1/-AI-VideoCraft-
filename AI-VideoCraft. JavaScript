@@ -1,0 +1,37 @@
+import React, { useState, useEffect } from "react";
+import { auth, db } from "./firebase"; // Firebase authentication setup
+import { getDoc, doc } from "firebase/firestore";
+
+const AdBanner = () => {
+  const [isPaidUser, setIsPaidUser] = useState(false);
+
+  useEffect(() => {
+    const checkUserSubscription = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().isPaid) {
+          setIsPaidUser(true);
+        }
+      }
+    };
+    checkUserSubscription();
+  }, []);
+
+  return isPaidUser ? null : (
+    <div>
+      <h3>Advertisement</h3>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="***ca-pub-xxxxxxxxxxxxxxxx***"
+        data-ad-slot="***1234567890***"
+        data-ad-format="auto"
+      ></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  );
+};
+
+export default AdBanner;
