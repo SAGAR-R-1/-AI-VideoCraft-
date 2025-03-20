@@ -1,0 +1,31 @@
+import React, { useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe("***your_publishable_key***");
+
+const Subscription = ({ userId }) => {
+  const [isPaid, setIsPaid] = useState(false);
+
+  const handleSubscribe = async () => {
+    const stripe = await stripePromise;
+    
+    const response = await fetch("/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, amount: 9.99 }), // Monthly Subscription Fee
+    });
+
+    const session = await response.json();
+    stripe.redirectToCheckout({ sessionId: session.clientSecret });
+  };
+
+  return (
+    <div>
+      <h2>{isPaid ? "You are a Premium User 🎉" : "Upgrade to Remove Ads"}</h2>
+      {!isPaid && <button onClick={handleSubscribe}>Go Premium - $9.99/month</button>}
+    </div>
+  );
+};
+
+export default Subscription;
+
